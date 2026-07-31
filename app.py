@@ -15,7 +15,8 @@ app = Flask(__name__)
 # Helper: Load results from disk
 # ─────────────────────────────────────────────
 def load_results():
-    path = 'model/results.json'
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(base_dir, 'model', 'results.json')
     if os.path.exists(path):
         with open(path) as f:
             return json.load(f)
