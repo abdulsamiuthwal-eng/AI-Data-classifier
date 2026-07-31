@@ -9,7 +9,11 @@ from flask import Flask, render_template, request, jsonify
 from model.train import run_training_pipeline
 from model.predict import predict_species
 
-app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
+
+app = Flask(__name__, template_folder=TEMPLATE_DIR, static_folder=STATIC_DIR)
 
 # ─────────────────────────────────────────────
 # Helper: Load results from disk

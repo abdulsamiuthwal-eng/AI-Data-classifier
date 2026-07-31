@@ -7,10 +7,13 @@ import joblib
 import numpy as np
 
 
+import os
+
 def load_model():
     """Load saved model and scaler."""
-    model  = joblib.load('model/classifier.pkl')
-    scaler = joblib.load('model/scaler.pkl')
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    model  = joblib.load(os.path.join(base_dir, 'classifier.pkl'))
+    scaler = joblib.load(os.path.join(base_dir, 'scaler.pkl'))
     return model, scaler
 
 

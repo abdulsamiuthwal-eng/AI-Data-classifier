@@ -117,10 +117,11 @@ def train_all_models(X_train, X_test, y_train, y_test):
 # ─────────────────────────────────────────────
 def save_artifacts(model, scaler, results, best_model_name):
     """Save model, scaler, and results to disk."""
-    os.makedirs('model', exist_ok=True)
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    os.makedirs(base_dir, exist_ok=True)
 
-    joblib.dump(model, 'model/classifier.pkl')
-    joblib.dump(scaler, 'model/scaler.pkl')
+    joblib.dump(model, os.path.join(base_dir, 'classifier.pkl'))
+    joblib.dump(scaler, os.path.join(base_dir, 'scaler.pkl'))
 
     output = {
         'best_model': best_model_name,
@@ -132,12 +133,12 @@ def save_artifacts(model, scaler, results, best_model_name):
         ]
     }
 
-    with open('model/results.json', 'w') as f:
+    with open(os.path.join(base_dir, 'results.json'), 'w') as f:
         json.dump(output, f, indent=2)
 
     print(f"\n[OK] Best Model: {best_model_name}")
-    print("[OK] Model saved to model/classifier.pkl")
-    print("[OK] Results saved to model/results.json")
+    print("[OK] Model saved to classifier.pkl")
+    print("[OK] Results saved to results.json")
 
 
 # ─────────────────────────────────────────────
