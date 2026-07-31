@@ -28,17 +28,18 @@ def load_results():
 # ─────────────────────────────────────────────
 
 @app.route('/')
+def landing():
+    """Get Started landing page."""
+    return render_template('landing.html')
+
+
+@app.route('/dashboard')
 def index():
     """Main dashboard."""
     results = load_results()
     trained = results is not None
     return render_template('index.html', results=results, trained=trained)
 
-
-@app.route('/landing')
-def landing():
-    """Get Started landing page."""
-    return render_template('landing.html')
 
 
 @app.route('/train', methods=['GET', 'POST'])
