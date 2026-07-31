@@ -4,7 +4,20 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a, button, input, select, textarea {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+a:focus, button:focus, input:focus {
+  outline: none;
+}
 
 :root {
   /* Light Lemon Pastel Theme */
@@ -47,12 +60,12 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
-  animation: pageFadeIn 0.4s ease-out;
+  animation: pageFadeIn 0.25s ease-in-out;
 }
 
 @keyframes pageFadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* ── Navbar ── */
