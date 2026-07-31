@@ -427,3 +427,24 @@ body {
   .cards-grid, .results-grid, .info-grid, .pipeline { grid-template-columns: 1fr; }
   .chart-section, .predict-layout { grid-template-columns: 1fr; }
 }
+
+@media (max-width: 768px) {
+  .navbar { padding: 0.9rem 1.25rem; flex-direction: column; gap: 0.8rem; text-align: center; }
+  .nav-links { gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
+  .nav-link { padding: 0.4rem 0.85rem; font-size: 0.85rem; }
+  .hero-title { font-size: 2.2rem; }
+  .hero-desc { font-size: 0.95rem; }
+  .btn { padding: 0.75rem 1.4rem; width: 100%; justify-content: center; }
+  .hero-actions { flex-direction: column; width: 100%; max-width: 320px; margin: 0 auto; }
+  .sample-btns { grid-template-columns: 1fr; }
+  .inputs-grid { grid-template-columns: 1fr; }
+  .features-table-wrap { overflow-x: auto; }
+  .footer { padding: 1.5rem 1rem; font-size: 0.8rem; }
+}
+
+@media (max-width: 480px) {
+  .hero-title { font-size: 1.8rem; }
+  .section { padding: 2rem 1rem; }
+  .card, .predict-form-card, .chart-card { padding: 1.25rem; }
+  .result-class { font-size: 1.8rem; }
+}

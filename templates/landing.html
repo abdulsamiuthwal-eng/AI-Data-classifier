@@ -185,13 +185,18 @@
       html, body { overflow: auto; }
       .hero {
         grid-template-columns: 1fr;
-        height: auto; padding: 5rem 2rem 4rem;
+        min-height: 100vh; height: auto;
+        padding: 4rem 1.75rem 3rem;
         text-align: center;
+        gap: 1.5rem;
       }
       .hero-left { align-items: center; }
-      .hero-right { order: -1; }
-      #heroCanvas3D { width: 260px !important; height: 260px !important; }
+      .hero-right { order: -1; margin-top: 1rem; }
+      #heroCanvas3D { width: 240px !important; height: 240px !important; }
       .float-badge { display: none; }
+      .hero-title { font-size: clamp(2rem, 8vw, 3rem); }
+      .hero-desc { font-size: 0.92rem; line-height: 1.65; max-width: 100%; margin-bottom: 2rem; }
+      .btn-get-started { width: 100%; max-width: 280px; justify-content: center; padding: 0.9rem 1.8rem; }
     }
   </style>
 </head>
