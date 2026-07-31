@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Classifier — DecodeLabs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold-400: #facc15;
+      --gold-500: #eab308;
+      --gold-600: #ca8a04;
+      --dark-900: #0a0a0f;
+      --glass-bg: rgba(255, 255, 255, 0.04);
+      --glass-border: rgba(234, 179, 8, 0.18);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+    }
+
+    html, body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark-900);
+      color: var(--text-primary);
+      width: 100%; height: 100%;
+      overflow: hidden; /* no scroll */
+    }
+
+    /* ── Particle Canvas ── */
+    #bgCanvas {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0; pointer-events: none;
+    }
+
+    /* ── Ambient Orbs ── */
+    .orb {
+      position: fixed; border-radius: 50%;
+      filter: blur(90px); pointer-events: none; z-index: 0;
+      animation: drift 14s ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 700px; height: 700px; background: var(--gold-500); opacity: 0.09; top: -250px; right: -150px; }
+    .orb-2 { width: 450px; height: 450px; background: var(--gold-600); opacity: 0.08; bottom: -200px; left: -120px; animation-delay: -5s; }
+
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(25px, -35px) scale(1.04); }
+    }
+
+    /* ── Full-screen hero ── */
+    .hero {
+      position: relative; z-index: 1;
+      width: 100vw; height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 0 6rem;
+      gap: 2rem;
+    }
+
+    /* ── Left side ── */
+    .hero-left { display: flex; flex-direction: column; align-items: flex-start; }
+
+    .hero-title {
+      font-size: clamp(3rem, 5.5vw, 5rem);
+      font-weight: 900;
+      line-height: 1.04;
+      letter-spacing: -0.04em;
+      margin-bottom: 1.4rem;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.2s forwards;
+    }
+    .line-plain { display: block; color: var(--text-primary); }
+    .line-gold {
+      display: block;
+      background: linear-gradient(135deg, var(--gold-400) 0%, var(--gold-500) 50%, var(--gold-600) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-desc {
+      font-size: 1rem; line-height: 1.75;
+      color: var(--text-secondary);
+      max-width: 420px;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.45s forwards;
+    }
+
+    /* ── Get Started button only ── */
+    .btn-get-started {
+      display: inline-flex; align-items: center; gap: 0.7rem;
+      padding: 0.95rem 2.2rem; border-radius: 14px;
+      background: linear-gradient(135deg, var(--gold-500), var(--gold-600));
+      color: #0a0a0f; font-weight: 800; font-size: 1.05rem;
+      text-decoration: none;
+      box-shadow: 0 0 36px rgba(234, 179, 8, 0.4);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.7s forwards;
+    }
+    .btn-get-started:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 56px rgba(234, 179, 8, 0.65);
+    }
+    .btn-get-started .btn-icon-arrow {
+      transition: transform 0.25s ease;
+    }
+    .btn-get-started:hover .btn-icon-arrow {
+      transform: translateX(4px);
+    }
+
+    /* ── Right side: 3D canvas ── */
+    .hero-right {
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      opacity: 0;
+      animation: fadeIn 1.4s ease 0.3s forwards;
+    }
+
+    #heroCanvas3D { border-radius: 50%; position: relative; z-index: 2; }
+
+    .glow-ring {
+      position: absolute; inset: -30px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(234,179,8,0.13) 0%, transparent 70%);
+      animation: ringPulse 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes ringPulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50%       { transform: scale(1.07); opacity: 1; }
+    }
+
+    /* ── Floating info badges ── */
+    .float-badge {
+      position: absolute;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(16px);
+      border-radius: 12px; padding: 0.6rem 1rem;
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.78rem; font-weight: 600; z-index: 3;
+      white-space: nowrap;
+    }
+    .bdot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--gold-500); flex-shrink: 0;
+      animation: blink 2s ease infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.45; transform: scale(0.65); }
+    }
+
+    .fb-1 { top: 8%;  left: -5%;  animation: fl1 5s ease-in-out infinite; }
+    .fb-2 { top: 50%; left: -10%; animation: fl1 7s ease-in-out infinite reverse; }
+    .fb-3 { bottom: 8%; right: -5%; animation: fl2 6s ease-in-out infinite; }
+
+    @keyframes fl1 {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-10px); }
+    }
+    @keyframes fl2 {
+      0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+      50%       { transform: translateY(-9px) rotate(1.5deg); }
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      html, body { overflow: auto; }
+      .hero {
+        grid-template-columns: 1fr;
+        height: auto; padding: 5rem 2rem 4rem;
+        text-align: center;
+      }
+      .hero-left { align-items: center; }
+      .hero-right { order: -1; }
+      #heroCanvas3D { width: 260px !important; height: 260px !important; }
+      .float-badge { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <canvas id="bgCanvas"></canvas>
+
+  <section class="hero">
+
+    <!-- Left -->
+    <div class="hero-left">
+      <h1 class="hero-title">
+        <span class="line-plain">Smart Classification</span>
+        <span class="line-gold">Powered by Machine Learning</span>
+      </h1>
+      <p class="hero-desc">
+        Experience real-time botanical intelligence. Train, benchmark, and deploy advanced ML algorithms with instant multi-model analytics.
+      </p>
+      <a href="/" class="btn-get-started">
+        <svg class="btn-icon-spark" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/>
+        </svg>
+        <span>Get Started</span>
+        <svg class="btn-icon-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14"></path>
+          <path d="m12 5 7 7-7 7"></path>
+        </svg>
+      </a>
+    </div>
+
+    <!-- Right: 3D Neural Net -->
+    <div class="hero-right">
+      <div class="glow-ring"></div>
+      <canvas id="heroCanvas3D" width="480" height="480"></canvas>
+
+      <div class="float-badge fb-1"><span class="bdot"></span>3 ML Algorithms</div>
+      <div class="float-badge fb-2"><span class="bdot"></span>≥ 96% Accuracy</div>
+      <div class="float-badge fb-3"><span class="bdot"></span>150 Samples · 4 Features</div>
+    </div>
+
+  </section>
+
+  <script>
+  (function () {
+
+    /* ── Background Particle Network ── */
+    const bgC = document.getElementById('bgCanvas');
+    const bgCtx = bgC.getContext('2d');
+    let bW, bH;
+    const pts = [];
+
+    function resizeBg() {
+      bW = bgC.width  = window.innerWidth;
+      bH = bgC.height = window.innerHeight;
+    }
+
+    function mkPt() {
+      return {
+        x: Math.random() * bW,  y: Math.random() * bH,
+        vx: (Math.random() - 0.5) * 0.22,
+        vy: (Math.random() - 0.5) * 0.22,
+        r: Math.random() * 1.3 + 0.3,
+        op: Math.random() * 0.4 + 0.08
+      };
+    }
+
+    function initBg() {
+      pts.length = 0;
+      for (let i = 0; i < 75; i++) pts.push(mkPt());
+    }
+
+    function drawBg() {
+      bgCtx.clearRect(0, 0, bW, bH);
+
+      for (let i = 0; i < pts.length; i++) {
+        for (let j = i + 1; j < pts.length; j++) {
+          const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
+          const d = Math.sqrt(dx*dx + dy*dy);
+          if (d < 125) {
+            bgCtx.beginPath();
+            bgCtx.moveTo(pts[i].x, pts[i].y);
+            bgCtx.lineTo(pts[j].x, pts[j].y);
+            bgCtx.strokeStyle = `rgba(234,179,8,${(1 - d/125) * 0.1})`;
+            bgCtx.lineWidth = 0.5;
+            bgCtx.stroke();
+          }
+        }
+      }
+
+      pts.forEach(p => {
+        bgCtx.beginPath();
+        bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        bgCtx.fillStyle = `rgba(234,179,8,${p.op})`;
+        bgCtx.fill();
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > bW) p.vx *= -1;
+        if (p.y < 0 || p.y > bH) p.vy *= -1;
+      });
+
+      requestAnimationFrame(drawBg);
+    }
+
+    window.addEventListener('resize', () => { resizeBg(); initBg(); });
+    resizeBg(); initBg(); drawBg();
+
+    /* ── Hero 3D Neural Network ── */
+    const hc  = document.getElementById('heroCanvas3D');
+    const ctx = hc.getContext('2d');
+    const SZ  = 480, CX = SZ / 2, CY = SZ / 2;
+    hc.width  = SZ; hc.height = SZ;
+
+    const nodes = [];
+    const NC = 58;
+
+    for (let i = 0; i < NC; i++) {
+      const phi   = Math.acos(1 - 2 * (i + 0.5) / NC);
+      const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+      const R = 150 + Math.random() * 60;
+      nodes.push({
+        x: R * Math.sin(phi) * Math.cos(theta),
+        y: R * Math.sin(phi) * Math.sin(theta),
+        z: R * Math.cos(phi),
+        r: Math.random() * 3 + 1.5,
+        pulse: Math.random() * Math.PI * 2,
+        ps: 0.022 + Math.random() * 0.03
+      });
+    }
+
+    const edges = [];
+    for (let i = 0; i < nodes.length; i++)
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        const d = Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2 + (a.z-b.z)**2);
+        if (d < 118) edges.push([i, j, d]);
+      }
+
+    let rX = 0.3, rY = 0, tX = 0.3, tY = 0, spin = true;
+
+    hc.addEventListener('mousemove', e => {
+      const r = hc.getBoundingClientRect();
+      tY = ((e.clientX - r.left - CX) / CX) * 0.85;
+      tX = 0.3 + ((e.clientY - r.top  - CY) / CY) * 0.4;
+      spin = false;
+    });
+    hc.addEventListener('mouseleave', () => { spin = true; });
+
+    function proj(x, y, z) {
+      const cy = Math.cos(rY), sy = Math.sin(rY);
+      const x1 = x*cy + z*sy,  z1 = -x*sy + z*cy;
+      const cx = Math.cos(rX), sx = Math.sin(rX);
+      const y2 = y*cx - z1*sx, z2 =  y*sx + z1*cx;
+      const fov = 600, sc = fov / (fov + z2 + 200);
+      return { sx: x1*sc + CX, sy: y2*sc + CY, sc, z: z2 };
+    }
+
+    function draw3D() {
+      ctx.clearRect(0, 0, SZ, SZ);
+      if (spin) tY += 0.005;
+      rY += (tY - rY) * 0.04;
+      rX += (tX - rX) * 0.04;
+
+      const pj = nodes.map(n => ({ ...proj(n.x, n.y, n.z), node: n }));
+
+      edges.forEach(([i, j, d]) => {
+        const a = pj[i], b = pj[j];
+        const avgZ = (a.z + b.z) / 2;
+        const alpha = Math.max(0, (1 - d/118)) * 0.4 * ((avgZ + 260) / 520);
+        ctx.beginPath();
+        ctx.moveTo(a.sx, a.sy);
+        ctx.lineTo(b.sx, b.sy);
+        const g = ctx.createLinearGradient(a.sx, a.sy, b.sx, b.sy);
+        g.addColorStop(0, `rgba(234,179,8,${alpha})`);
+        g.addColorStop(1, `rgba(202,138,4,${alpha * 0.5})`);
+        ctx.strokeStyle = g;
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      });
+
+      pj.sort((a, b) => a.z - b.z).forEach(p => {
+        p.node.pulse += p.node.ps;
+        const gw  = Math.sin(p.node.pulse) * 0.5 + 0.5;
+        const rad = p.node.r * p.sc * (1 + gw * 0.4);
+        const br  = (p.z + 260) / 520;
+
+        const g = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, rad * 4);
+        g.addColorStop(0, `rgba(234,179,8,${br * 0.45 * gw})`);
+        g.addColorStop(1, 'rgba(234,179,8,0)');
+        ctx.beginPath(); ctx.arc(p.sx, p.sy, rad * 4, 0, Math.PI * 2);
+        ctx.fillStyle = g; ctx.fill();
+
+        ctx.beginPath(); ctx.arc(p.sx, p.sy, rad, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(250,204,21,${0.5 + br * 0.5})`;
+        ctx.fill();
+      });
+
+      const cg = ctx.createRadialGradient(CX, CY, 0, CX, CY, 72);
+      cg.addColorStop(0, 'rgba(234,179,8,0.07)');
+      cg.addColorStop(1, 'rgba(234,179,8,0)');
+      ctx.beginPath(); ctx.arc(CX, CY, 72, 0, Math.PI * 2);
+      ctx.fillStyle = cg; ctx.fill();
+
+      requestAnimationFrame(draw3D);
+    }
+
+    draw3D();
+
+  })();
+  </script>
+
+</body>
+</html>

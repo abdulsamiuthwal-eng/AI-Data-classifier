@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Classifier — DecodeLabs</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=7" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <img src="{{ url_for('static', filename='images/brain.png') }}" class="nav-logo-img" alt="DecodeLabs Logo" />
+      <span class="nav-title">AI Classifier</span>
+      <span class="nav-badge">DecodeLabs</span>
+    </div>
+    <div class="nav-links">
+      <a href="/" class="nav-link active">Dashboard</a>
+      <a href="/train" class="nav-link">Train Model</a>
+      <a href="/predict" class="nav-link">Predict</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section with Continuous Rotating Brain & Neuron Particles -->
+  <header class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">Project 2 · Supervised Machine Learning</div>
+      <h1 class="hero-title">Data Classification<br /><span class="gradient-text">Using Artificial Intelligence</span></h1>
+      <p class="hero-desc">An end-to-end Machine Learning pipeline that trains, evaluates, and deploys classification models on botanical data with KNN, Decision Tree, and Random Forest algorithms.</p>
+      <div class="hero-actions">
+        {% if not trained %}
+        <a href="/train" class="btn btn-primary">Train Model Now</a>
+        {% else %}
+        <a href="/predict" class="btn btn-primary">Make Prediction</a>
+        <a href="/train" class="btn btn-outline">Retrain Model</a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="hero-graphic">
+      <div class="brain-animation-container">
+        <canvas id="brainCanvas" class="brain-canvas"
+          aria-label="Interactive 3D golden AI brain with neural network animation"
+          role="img"></canvas>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats Cards -->
+  {% if trained %}
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Model Performance</h2>
+      <p class="section-sub">Selected Optimal Model: <strong>{{ results.best_model }}</strong></p>
+    </div>
+    <div class="cards-grid">
+      {% for name, data in results.results.items() %}
+      <div class="card {% if name == results.best_model %}card-best{% endif %}">
+        {% if name == results.best_model %}
+        <div class="card-crown">Optimal Model</div>
+        {% endif %}
+        <div class="card-header">
+          <h3 class="card-title">{{ name }}</h3>
+        </div>
+        <div class="metric-big">{{ data.accuracy }}%</div>
+        <div class="metric-label">Accuracy Score</div>
+        <div class="metrics-row">
+          <div class="metric-pill">
+            <span class="metric-pill-label">Precision</span>
+            <span class="metric-pill-val">{{ data.precision }}%</span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-pill-label">Recall</span>
+            <span class="metric-pill-val">{{ data.recall }}%</span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-pill-label">F1 Score</span>
+            <span class="metric-pill-val">{{ data.f1_score }}%</span>
+          </div>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" style="width: {{ data.accuracy }}%"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Accuracy Chart -->
+    <div class="chart-section">
+      <div class="chart-card">
+        <h3 class="chart-title">Algorithm Accuracy Comparison</h3>
+        <canvas id="accuracyChart" height="110"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3 class="chart-title">Detailed Metrics Breakdown</h3>
+        <canvas id="metricsChart" height="110"></canvas>
+      </div>
+    </div>
+  </section>
+
+  {% else %}
+  <!-- Not trained yet -->
+  <section class="section">
+    <div class="empty-state" style="text-align:center; padding:3rem;">
+      <h2 class="empty-title">Model Not Trained Yet</h2>
+      <p class="empty-desc">Execute model training to evaluate 3 supervised learning algorithms.</p>
+      <a href="/train" class="btn btn-primary">Start Model Training</a>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Dataset Info with Real Photos -->
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Iris Species Dataset</h2>
+      <p class="section-sub">150 real botanical samples categorized into 3 species</p>
+    </div>
+    
+    <div class="info-grid">
+      <div class="flower-card">
+        <div class="flower-img-wrap">
+          <img src="{{ url_for('static', filename='images/setosa.png') }}" alt="Iris Setosa" class="flower-img" />
+        </div>
+        <div class="flower-body">
+          <h3 class="flower-name">Iris Setosa</h3>
+          <p class="flower-count">50 Verified Samples</p>
+        </div>
+      </div>
+
+      <div class="flower-card">
+        <div class="flower-img-wrap">
+          <img src="{{ url_for('static', filename='images/versicolor.png') }}" alt="Iris Versicolor" class="flower-img" />
+        </div>
+        <div class="flower-body">
+          <h3 class="flower-name">Iris Versicolor</h3>
+          <p class="flower-count">50 Verified Samples</p>
+        </div>
+      </div>
+
+      <div class="flower-card">
+        <div class="flower-img-wrap">
+          <img src="{{ url_for('static', filename='images/virginica.png') }}" alt="Iris Virginica" class="flower-img" />
+        </div>
+        <div class="flower-body">
+          <h3 class="flower-name">Iris Virginica</h3>
+          <p class="flower-count">50 Verified Samples</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="features-table-wrap">
+      <table class="features-table">
+        <thead>
+          <tr><th>#</th><th>Feature Attribute</th><th>Description</th><th>Measurement Unit</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Sepal Length</td><td>Outer leaf structural length</td><td>Centimeters (cm)</td></tr>
+          <tr><td>2</td><td>Sepal Width</td><td>Outer leaf structural width</td><td>Centimeters (cm)</td></tr>
+          <tr><td>3</td><td>Petal Length</td><td>Inner petal length measurement</td><td>Centimeters (cm)</td></tr>
+          <tr><td>4</td><td>Petal Width</td><td>Inner petal width measurement</td><td>Centimeters (cm)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Machine Learning Pipeline Steps with High-Tech Emojis -->
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Machine Learning Pipeline</h2>
+      <p class="section-sub">Standardized technical workflow for model training and deployment</p>
+    </div>
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <span class="step-emoji">⚡</span>
+        <div class="step-num">STEP 01</div>
+        <div class="step-title">Data Ingestion</div>
+        <div class="step-desc">Iris dataset with 150 real samples</div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-emoji">🔀</span>
+        <div class="step-num">STEP 02</div>
+        <div class="step-title">Stratified Split</div>
+        <div class="step-desc">80% Training / 20% Testing sets</div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-emoji">📐</span>
+        <div class="step-num">STEP 03</div>
+        <div class="step-title">Normalization</div>
+        <div class="step-desc">StandardScaler feature scaling</div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-emoji">🧠</span>
+        <div class="step-num">STEP 04</div>
+        <div class="step-title">Ensemble Training</div>
+        <div class="step-desc">KNN · Decision Tree · Random Forest</div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-emoji">📊</span>
+        <div class="step-num">STEP 05</div>
+        <div class="step-title">Model Evaluation</div>
+        <div class="step-desc">Accuracy & Confusion Matrix</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>Built for <strong>DecodeLabs</strong> — Project 2: AI Data Classification · Batch 2026</p>
+  </footer>
+
+  {% if trained %}
+  <script>
+    const results = {{ results.results | tojson }};
+    const labels = Object.keys(results);
+    const accuracies = labels.map(k => results[k].accuracy);
+    const precisions = labels.map(k => results[k].precision);
+    const recalls    = labels.map(k => results[k].recall);
+    const f1s        = labels.map(k => results[k].f1_score);
+    const lemonPalette = ['#eab308', '#facc15', '#ca8a04'];
+
+    // Accuracy bar chart
+    new Chart(document.getElementById('accuracyChart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Accuracy (%)',
+          data: accuracies,
+          backgroundColor: lemonPalette,
+          borderRadius: 8,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: {
+            beginAtZero: true, max: 100,
+            grid: { color: 'rgba(234, 179, 8, 0.1)' },
+            ticks: { color: '#475569', callback: v => v + '%' }
+          },
+          x: { grid: { display: false }, ticks: { color: '#475569', font: { weight: 'bold' } } }
+        }
+      }
+    });
+
+    // Metrics grouped bar
+    new Chart(document.getElementById('metricsChart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Precision', data: precisions, backgroundColor: '#facc15', borderRadius: 4 },
+          { label: 'Recall',    data: recalls,    backgroundColor: '#eab308', borderRadius: 4 },
+          { label: 'F1 Score',  data: f1s,        backgroundColor: '#ca8a04', borderRadius: 4 }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: '#475569', font: { weight: 'bold' } } } },
+        scales: {
+          y: {
+            beginAtZero: true, max: 100,
+            grid: { color: 'rgba(234, 179, 8, 0.1)' },
+            ticks: { color: '#475569', callback: v => v + '%' }
+          },
+          x: { grid: { display: false }, ticks: { color: '#475569', font: { weight: 'bold' } } }
+        }
+      }
+    });
+  </script>
+  {% endif %}
+  <script src="{{ url_for('static', filename='js/brain-canvas.js') }}"></script>
+</body>
+</html>

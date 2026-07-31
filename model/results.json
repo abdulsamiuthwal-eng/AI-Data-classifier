@@ -1,0 +1,85 @@
+{
+  "best_model": "K-Nearest Neighbors",
+  "results": {
+    "K-Nearest Neighbors": {
+      "accuracy": 93.33,
+      "precision": 94.44,
+      "recall": 93.33,
+      "f1_score": 93.27,
+      "confusion_matrix": [
+        [
+          10,
+          0,
+          0
+        ],
+        [
+          0,
+          10,
+          0
+        ],
+        [
+          0,
+          2,
+          8
+        ]
+      ]
+    },
+    "Decision Tree": {
+      "accuracy": 93.33,
+      "precision": 93.33,
+      "recall": 93.33,
+      "f1_score": 93.33,
+      "confusion_matrix": [
+        [
+          10,
+          0,
+          0
+        ],
+        [
+          0,
+          9,
+          1
+        ],
+        [
+          0,
+          1,
+          9
+        ]
+      ]
+    },
+    "Random Forest": {
+      "accuracy": 90.0,
+      "precision": 90.24,
+      "recall": 90.0,
+      "f1_score": 89.97,
+      "confusion_matrix": [
+        [
+          10,
+          0,
+          0
+        ],
+        [
+          0,
+          9,
+          1
+        ],
+        [
+          0,
+          2,
+          8
+        ]
+      ]
+    }
+  },
+  "class_names": [
+    "Setosa",
+    "Versicolor",
+    "Virginica"
+  ],
+  "feature_names": [
+    "sepal_length",
+    "sepal_width",
+    "petal_length",
+    "petal_width"
+  ]
+}

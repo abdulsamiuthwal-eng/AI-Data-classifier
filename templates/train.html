@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Train Model — DecodeLabs AI Classifier</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=7" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand">
+      <img src="{{ url_for('static', filename='images/brain.png') }}" class="nav-logo-img" alt="Logo" />
+      <span class="nav-title">AI Classifier</span>
+      <span class="nav-badge">DecodeLabs</span>
+    </div>
+    <div class="nav-links">
+      <a href="/" class="nav-link">Dashboard</a>
+      <a href="/train" class="nav-link active">Train Model</a>
+      <a href="/predict" class="nav-link">Predict</a>
+    </div>
+  </nav>
+
+  <div class="page-container">
+    <div class="page-header">
+      <h1 class="page-title">Train Classification Model</h1>
+      <p class="page-desc">Execute the supervised machine learning pipeline to train KNN, Decision Tree, and Random Forest models.</p>
+    </div>
+
+    {% if message %}
+    <div class="alert alert-{{ message.type }}">
+      {{ message.text }}
+    </div>
+    {% endif %}
+
+    <!-- Training Form -->
+    <div class="train-card">
+      <div class="train-info">
+        <div class="train-info-item"><span>Dataset: Iris (150 real botanical samples)</span></div>
+        <div class="train-info-item"><span>Data Split: 80% Train / 20% Test</span></div>
+        <div class="train-info-item"><span>Classifiers: KNN · Decision Tree · Random Forest</span></div>
+        <div class="train-info-item"><span>Execution Time: ~2 seconds</span></div>
+      </div>
+
+      <form method="POST" id="trainForm">
+        <button type="submit" class="btn btn-primary btn-large" id="trainBtn">
+          <span id="btnText">Execute Model Training</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Results after training -->
+    {% if results %}
+    <div class="results-section">
+      <h2 class="results-title">Training Evaluation Results</h2>
+      <p class="results-sub">Selected Optimal Model: <strong class="highlight">{{ results.best_model }}</strong></p>
+
+      <div class="results-grid">
+        {% for name, data in results.results.items() %}
+        <div class="result-card {% if name == results.best_model %}result-card-best{% endif %}">
+          {% if name == results.best_model %}<div class="best-badge">Optimal Model</div>{% endif %}
+          <h3 class="result-name">{{ name }}</h3>
+          <div class="result-metrics">
+            <div class="rm"><div class="rm-val">{{ data.accuracy }}%</div><div class="rm-key">Accuracy</div></div>
+            <div class="rm"><div class="rm-val">{{ data.precision }}%</div><div class="rm-key">Precision</div></div>
+            <div class="rm"><div class="rm-val">{{ data.recall }}%</div><div class="rm-key">Recall</div></div>
+            <div class="rm"><div class="rm-val">{{ data.f1_score }}%</div><div class="rm-key">F1 Score</div></div>
+          </div>
+
+          <!-- Confusion Matrix -->
+          <div class="cm-wrap">
+            <div class="cm-title">Confusion Matrix</div>
+            <div class="cm-grid">
+              {% for row in data.confusion_matrix %}
+              {% for val in row %}
+              <div class="cm-cell {% if loop.index0 == loop.revindex0 %}cm-diag{% endif %}">{{ val }}</div>
+              {% endfor %}
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="train-actions" style="display:flex; gap:1rem; justify-content:center;">
+        <a href="/predict" class="btn btn-primary">Proceed to Predict</a>
+        <a href="/" class="btn btn-outline">View Dashboard</a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <footer class="footer">
+    <p>Built for <strong>DecodeLabs</strong> — Project 2: AI Data Classification · Batch 2026</p>
+  </footer>
+
+  <script>
+    document.getElementById('trainForm').addEventListener('submit', function () {
+      const btn = document.getElementById('trainBtn');
+      const txt = document.getElementById('btnText');
+      btn.disabled = true;
+      txt.innerHTML = 'Training Pipeline Executing...';
+    });
+  </script>
+</body>
+</html>
